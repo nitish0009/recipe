@@ -1,9 +1,5 @@
-from langchain.prompts import PromptTemplate
-
 # Recipe Extraction Prompt
-extraction_prompt = PromptTemplate(
-    input_variables=["scraped_text"],
-    template="""
+extraction_prompt = """
 You are a professional recipe extraction expert. Extract structured recipe data from the following HTML-scraped text.
 Return ONLY valid JSON with no additional text, markdown formatting, or commentary.
 
@@ -32,21 +28,18 @@ SCRAPED TEXT:
 
 RESPOND WITH ONLY VALID JSON:
 """
-)
 
 # Nutrition Estimation Prompt
-nutrition_prompt = PromptTemplate(
-    input_variables=["recipe_data"],
-    template="""
-You are a nutritionist. Estimate realistic nutritional information PER SERVING based on this recipe data.
+nutrition_prompt = """
+You are a nutritionist. Estimate realistic nutritional information PER SERVING based on this recipe ingredients.
 Use standard USDA nutritional databases as reference. Return ONLY valid JSON with no explanations.
 
-Recipe data:
-{recipe_data}
+Ingredients:
+{ingredients}
 
 Return ONLY this JSON structure (per serving):
 {{
-  "calories": <integer between 50 and 1000>,
+  "calories": "<number>",
   "protein": "<number>g",
   "carbs": "<number>g",
   "fat": "<number>g"
@@ -54,60 +47,47 @@ Return ONLY this JSON structure (per serving):
 
 Make reasonable estimates based on ingredients and quantities.
 """
-)
 
 # Ingredient Substitutions Prompt
-substitutions_prompt = PromptTemplate(
-    input_variables=["recipe_data"],
-    template="""
+substitutions_prompt = """
 Generate 3 useful ingredient substitutions for this recipe. Focus on common dietary needs (dairy-free, vegan, gluten-free, healthier alternatives).
 Return ONLY valid JSON array with no explanations.
 
-Recipe data:
-{recipe_data}
+Ingredients:
+{ingredients}
 
-Return exactly 3 substitutions as a JSON array of strings. Each string should be a specific, actionable suggestion like:
-"Replace butter with coconut oil for a dairy-free option"
-"Use almond flour instead of all-purpose flour for a gluten-free version"
-"Substitute eggs with flax seeds (1 tbsp flax + 3 tbsp water per egg) for a vegan option"
+Return exactly 3 substitutions as JSON strings. Each should be a specific, actionable suggestion.
 
 Return ONLY the JSON array:
+["substitution 1", "substitution 2", "substitution 3"]
 """
-)
 
 # Shopping List Prompt
-shopping_list_prompt = PromptTemplate(
-    input_variables=["recipe_data"],
-    template="""
-Create a shopping list grouped by category from this recipe's ingredients.
+shopping_list_prompt = """
+Create a shopping list grouped by category from these ingredients.
 Return ONLY valid JSON with no explanations.
 
-Recipe data:
-{recipe_data}
+Ingredients:
+{ingredients}
 
-Organize ingredients into logical categories. Return JSON object where keys are categories and values are arrays of ingredients.
-Categories: dairy, produce, meat/seafood, pantry, spices, bakery, frozen, other
+Organize ingredients into logical categories.
+Categories: dairy, produce, meat, pantry, spices, bakery, frozen, other
 
-Example format:
+Return JSON object:
 {{
-  "dairy": ["butter", "milk"],
-  "produce": ["onions", "garlic"],
-  "pantry": ["olive oil", "flour"]
+  "dairy": ["item1", "item2"],
+  "produce": ["item3", "item4"],
+  "pantry": ["item5"]
 }}
 
 Return ONLY the JSON object:
 """
-)
 
 # Related Recipes Prompt
-related_recipes_prompt = PromptTemplate(
-    input_variables=["recipe_data"],
-    template="""
-Suggest 3 related recipes that pair well or complement this recipe. These should be actual well-known recipes that go well with the given dish.
+related_recipes_prompt = """
+Suggest 3 related recipes that pair well with a {title} recipe from {cuisine} cuisine.
+These should be actual well-known recipes that go well with the given dish.
 Return ONLY valid JSON array with no explanations.
-
-Recipe data:
-{recipe_data}
 
 Think about complementary flavors, courses (appetizer, main, dessert, side), and cuisines.
 Return exactly 3 recipe names as JSON array of strings.
@@ -117,20 +97,17 @@ Example:
 
 Return ONLY the JSON array:
 """
-)
 
 # Meal Plan Combined Shopping List Prompt
-meal_plan_shopping_prompt = PromptTemplate(
-    input_variables=["recipes_data"],
-    template="""
+meal_plan_shopping_prompt = """
 You are a smart grocery shopper. Combine ingredients from multiple recipes into one optimized shopping list.
-Merge quantities of duplicate ingredients (e.g., if Recipe A needs 2 cups flour and Recipe B needs 1 cup, combine to 3 cups).
+Merge quantities of duplicate ingredients.
 Return ONLY valid JSON with no explanations.
 
-Multiple recipes data:
-{recipes_data}
+Ingredients from multiple recipes:
+{ingredients}
 
-Return JSON object with categories as keys:
+Return JSON object with categories:
 {{
   "dairy": ["2 cups milk", "1 lb butter"],
   "produce": ["3 onions", "6 cloves garlic"],
@@ -145,4 +122,3 @@ Smart rules:
 
 Return ONLY the JSON object:
 """
-)

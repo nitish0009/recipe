@@ -12,7 +12,7 @@ function App() {
       <header className="App-header">
         <div className="header-content">
           <div className="logo-section">
-            <h1>🍽️ Recipe Extractor & Meal Planner</h1>
+            <h1>Recipe Extractor & Meal Planner</h1>
             <p className="tagline">AI-powered recipe extraction and intelligent meal planning</p>
           </div>
           
@@ -22,21 +22,21 @@ function App() {
               onClick={() => setActiveTab('extract')}
               title="Extract recipes from URLs"
             >
-              📝 Extract Recipe
+              Extract Recipe
             </button>
             <button 
               className={`tab-btn ${activeTab === 'saved' ? 'active' : ''}`}
               onClick={() => setActiveTab('saved')}
               title="View all saved recipes"
             >
-              💾 Saved Recipes
+              Saved Recipes
             </button>
             <button 
               className={`tab-btn ${activeTab === 'planner' ? 'active' : ''}`}
               onClick={() => setActiveTab('planner')}
               title="Plan meals with multiple recipes"
             >
-              🍳 Meal Planner
+              Meal Planner
             </button>
           </nav>
         </div>

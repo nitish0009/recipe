@@ -197,10 +197,3 @@ function SavedRecipes() {
 }
 
 export default SavedRecipes;
-        </div>
-      )}
-    </div>
-  );
-}
-
-export default SavedRecipes;

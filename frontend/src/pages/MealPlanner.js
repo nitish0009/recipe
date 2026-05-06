@@ -88,7 +88,7 @@ function MealPlanner() {
     Object.entries(mealPlan.shopping_list).forEach(([category, items]) => {
       text += `${category.toUpperCase()}:\n`;
       if (Array.isArray(items)) {
-        items.forEach(item => text += `  ☐ ${item}\n`);
+        items.forEach(item => text += `  [ ] ${item}\n`);
       }
       text += '\n';
     });
@@ -119,7 +119,7 @@ function MealPlanner() {
 
   return (
     <div className="meal-planner-container">
-      <h2>🍳 Meal Planner</h2>
+      <h2>Meal Planner</h2>
       <p className="subtitle">Select 2-10 recipes to create an optimized shopping list</p>
 
       {error && <div className="alert alert-error"><strong>Error:</strong> {error}</div>}
@@ -213,8 +213,8 @@ function MealPlanner() {
                 <h4>{recipe.title}</h4>
                 <p><strong>{recipe.cuisine}</strong></p>
                 <p className="difficulty"><span className={`badge ${recipe.difficulty}`}>{recipe.difficulty}</span></p>
-                <p className="timing">⏱️ {recipe.prep_time || 'N/A'} prep • {recipe.cook_time || 'N/A'} cook</p>
-                <p className="servings">👥 {recipe.servings || '?'} servings</p>
+                <p className="timing">{recipe.prep_time || 'N/A'} prep • {recipe.cook_time || 'N/A'} cook</p>
+                <p className="servings">{recipe.servings || '?'} servings</p>
                 <button 
                   className="btn-view"
                   onClick={(e) => {
