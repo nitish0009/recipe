@@ -20,7 +20,7 @@ function SavedRecipes() {
     setLoading(true);
     setError('');
     try {
-      const response = await axios.get('http://localhost:8000/api/recipes');
+      const response = await axios.get('http://localhost:8001/api/recipes');
       setRecipes(response.data.recipes || response.data);
     } catch (err) {
       setError('Failed to fetch recipes. Make sure the backend is running.');
@@ -32,7 +32,7 @@ function SavedRecipes() {
 
   const viewDetails = async (id) => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/recipes/${id}`);
+      const response = await axios.get(`http://localhost:8001/api/recipes/${id}`);
       setSelectedRecipe(response.data);
       setShowModal(true);
     } catch (err) {
@@ -45,7 +45,7 @@ function SavedRecipes() {
     if (!window.confirm('Are you sure you want to delete this recipe?')) return;
     
     try {
-      await axios.delete(`http://localhost:8000/api/recipes/${id}`);
+      await axios.delete(`http://localhost:8001/api/recipes/${id}`);
       setRecipes(recipes.filter(r => r.id !== id));
       setShowModal(false);
       setSelectedRecipe(null);

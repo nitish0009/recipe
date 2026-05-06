@@ -26,7 +26,7 @@ function ExtractRecipe() {
         throw new Error('URL must start with http:// or https://');
       }
 
-      const response = await axios.post('http://localhost:8000/api/extract-recipe', { 
+      const response = await axios.post('http://localhost:8001/api/extract-recipe', { 
         url: url.trim() 
       }, {
         timeout: 60000 // 60 second timeout for extraction

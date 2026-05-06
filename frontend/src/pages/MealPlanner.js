@@ -20,7 +20,7 @@ function MealPlanner() {
     setLoading(true);
     setError('');
     try {
-      const response = await axios.get('http://localhost:8000/api/recipes');
+      const response = await axios.get('http://localhost:8001/api/recipes');
       setRecipes(response.data.recipes || response.data);
     } catch (err) {
       setError('Failed to fetch recipes. Make sure the backend is running.');
@@ -52,7 +52,7 @@ function MealPlanner() {
     setGeneratingPlan(true);
     setError('');
     try {
-      const response = await axios.post('http://localhost:8000/api/meal-plan', {
+      const response = await axios.post('http://localhost:8001/api/meal-plan', {
         recipe_ids: selectedRecipes
       });
       setMealPlan(response.data);
