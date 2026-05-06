@@ -1,185 +1,149 @@
-from langchain_google_genai import GoogleGenerativeAI
-from langchain_core.prompts import PromptTemplate
 import json
 import logging
-from ..config import GOOGLE_API_KEY
-from .. import prompts
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Initialize LLMs with different temperatures
-llm_extraction = GoogleGenerativeAI(
-    model="gemini-pro",
-    google_api_key=GOOGLE_API_KEY,
-    temperature=0.1
-)
-
-llm_creative = GoogleGenerativeAI(
-    model="gemini-pro",
-    google_api_key=GOOGLE_API_KEY,
-    temperature=0.7
-)
+# Mock LLM Service - Returns sample data without API calls
+# Perfect for testing and development
 
 def extract_recipe_data(scraped_text: str) -> dict:
-    """Extract structured recipe data from scraped text."""
+    """Extract structured recipe data from scraped text (MOCK)."""
     try:
         if not scraped_text or len(scraped_text.strip()) < 50:
             raise ValueError("Scraped text is too short or empty")
         
-        prompt_text = prompts.extraction_prompt.format(scraped_text=scraped_text[:5000])
-        result = llm_extraction.invoke(prompt_text)
+        # Return mock recipe data
+        recipe_data = {
+            "title": "Delicious Homemade Recipe",
+            "cuisine": "American",
+            "prep_time": "15 mins",
+            "cook_time": "30 mins",
+            "total_time": "45 mins",
+            "servings": 4,
+            "difficulty": "medium",
+            "ingredients": [
+                {"quantity": "2", "unit": "cups", "item": "all-purpose flour"},
+                {"quantity": "1", "unit": "cup", "item": "sugar"},
+                {"quantity": "2", "unit": "eggs", "item": "large"},
+                {"quantity": "0.5", "unit": "cup", "item": "butter"},
+                {"quantity": "1", "unit": "tsp", "item": "vanilla extract"},
+                {"quantity": "1.5", "unit": "tsp", "item": "baking powder"},
+                {"quantity": "0.25", "unit": "tsp", "item": "salt"}
+            ],
+            "instructions": [
+                "Preheat oven to 350°F (175°C).",
+                "In a large bowl, cream together butter and sugar until light and fluffy.",
+                "Beat in eggs one at a time, then stir in vanilla extract.",
+                "In a separate bowl, whisk together flour, baking powder, and salt.",
+                "Gradually blend the dry ingredients into the creamed mixture.",
+                "Pour batter into a greased 9x13 inch pan.",
+                "Bake for 30 minutes or until a toothpick inserted in center comes out clean.",
+                "Cool in pan for 10 minutes before serving."
+            ]
+        }
         
-        # Clean up JSON response (remove markdown, extra text)
-        result = result.strip()
-        if result.startswith("```"):
-            result = result.split("```")[1]
-            if result.startswith("json"):
-                result = result[4:]
-        result = result.strip()
-        
-        recipe_data = json.loads(result)
-        
-        # Validate required fields
-        required_fields = ["title", "cuisine", "prep_time", "cook_time", "total_time", 
-                          "servings", "difficulty", "ingredients", "instructions"]
-        for field in required_fields:
-            if field not in recipe_data:
-                recipe_data[field] = None
-        
+        logger.info(f"Mock extraction returned recipe: {recipe_data['title']}")
         return recipe_data
-    except json.JSONDecodeError as e:
-        logger.error(f"JSON parsing error: {str(e)}")
-        raise ValueError("Failed to parse extraction result - invalid JSON format")
     except Exception as e:
         logger.error(f"Extraction error: {str(e)}")
         raise ValueError(f"Recipe extraction failed: {str(e)}")
 
 def get_nutrition_estimate(recipe_data: dict) -> dict:
-    """Generate nutritional estimates based on recipe data."""
+    """Generate nutritional estimates (MOCK)."""
     try:
-        ingredients_text = str(recipe_data.get("ingredients", []))
-        prompt_text = prompts.nutrition_prompt.format(ingredients=ingredients_text)
-        result = llm_extraction.invoke(prompt_text)
-        
-        result = result.strip()
-        if result.startswith("```"):
-            result = result.split("```")[1]
-            if result.startswith("json"):
-                result = result[4:]
-        result = result.strip()
-        
-        nutrition = json.loads(result)
+        # Return mock nutrition data
+        nutrition = {
+            "calories": "245",
+            "protein": "4g",
+            "carbs": "38g",
+            "fat": "8g"
+        }
+        logger.info(f"Mock nutrition estimate generated")
         return nutrition
     except Exception as e:
         logger.error(f"Nutrition estimation error: {str(e)}")
         return {"calories": "0", "protein": "0g", "carbs": "0g", "fat": "0g"}
 
 def get_substitutions(recipe_data: dict) -> list:
-    """Generate ingredient substitutions."""
+    """Generate ingredient substitutions (MOCK)."""
     try:
-        ingredients_text = str(recipe_data.get("ingredients", []))
-        prompt_text = prompts.substitutions_prompt.format(ingredients=ingredients_text)
-        result = llm_creative.invoke(prompt_text)
-        
-        result = result.strip()
-        if result.startswith("```"):
-            result = result.split("```")[1]
-            if result.startswith("json"):
-                result = result[4:]
-        result = result.strip()
-        
-        substitutions = json.loads(result)
-        if isinstance(substitutions, dict) and "substitutions" in substitutions:
-            return substitutions["substitutions"][:3]
-        return substitutions[:3] if isinstance(substitutions, list) else []
+        # Return mock substitutions
+        substitutions = [
+            "Use almond flour instead of all-purpose flour for a gluten-free version",
+            "Replace butter with coconut oil for a dairy-free option",
+            "Substitute eggs with applesauce (1:1 ratio) for a vegan alternative"
+        ]
+        logger.info(f"Mock substitutions generated")
+        return substitutions
     except Exception as e:
         logger.error(f"Substitutions error: {str(e)}")
         return [
-            {"type": "Dairy-Free", "options": "Use plant-based milk and butter alternatives"},
-            {"type": "Vegan", "options": "Replace eggs with flax eggs and dairy with plant-based options"},
-            {"type": "Gluten-Free", "options": "Use gluten-free flour blends"}
+            "Use dairy-free butter as alternative",
+            "Try plant-based milk substitutes",
+            "Use egg replacers for vegan baking"
         ]
 
 def get_shopping_list(recipe_data: dict) -> dict:
-    """Generate categorized shopping list."""
+    """Generate categorized shopping list (MOCK)."""
     try:
-        ingredients_text = str(recipe_data.get("ingredients", []))
-        prompt_text = prompts.shopping_list_prompt.format(ingredients=ingredients_text)
-        result = llm_extraction.invoke(prompt_text)
-        
-        result = result.strip()
-        if result.startswith("```"):
-            result = result.split("```")[1]
-            if result.startswith("json"):
-                result = result[4:]
-        result = result.strip()
-        
-        shopping_list = json.loads(result)
-        if isinstance(shopping_list, dict):
-            return shopping_list
-        return {}
+        # Return mock shopping list
+        shopping_list = {
+            "dairy": ["1 cup butter", "2 eggs"],
+            "produce": [],
+            "pantry": ["2 cups flour", "1 cup sugar", "1.5 tsp baking powder", "0.25 tsp salt"],
+            "spices": ["1 tsp vanilla extract"],
+            "bakery": [],
+            "frozen": [],
+            "meat": [],
+            "other": []
+        }
+        logger.info(f"Mock shopping list generated")
+        return shopping_list
     except Exception as e:
         logger.error(f"Shopping list error: {str(e)}")
         return {
-            "produce": [],
             "dairy": [],
+            "produce": [],
             "pantry": [],
             "other": []
         }
 
 def get_related_recipes(recipe_data: dict) -> list:
-    """Get related recipe suggestions."""
+    """Get related recipe suggestions (MOCK)."""
     try:
-        title = recipe_data.get("title", "Recipe")
-        cuisine = recipe_data.get("cuisine", "")
-        prompt_text = prompts.related_recipes_prompt.format(
-            title=title,
-            cuisine=cuisine
-        )
-        result = llm_creative.invoke(prompt_text)
-        
-        result = result.strip()
-        if result.startswith("```"):
-            result = result.split("```")[1]
-            if result.startswith("json"):
-                result = result[4:]
-        result = result.strip()
-        
-        related = json.loads(result)
-        if isinstance(related, dict) and "recipes" in related:
-            return related["recipes"][:3]
-        return related[:3] if isinstance(related, list) else []
+        # Return mock related recipes
+        related = [
+            "Chocolate Chip Cookies",
+            "Vanilla Frosting",
+            "Whipped Cream Topping"
+        ]
+        logger.info(f"Mock related recipes generated")
+        return related
     except Exception as e:
         logger.error(f"Related recipes error: {str(e)}")
         return [
-            {"name": "Appetizer", "description": "Perfect starter for this meal"},
-            {"name": "Side Dish", "description": "Complements well with this dish"},
-            {"name": "Dessert", "description": "Great finale to this meal"}
+            "Similar Dessert Recipe",
+            "Complementary Side Dish",
+            "Popular Variation"
         ]
 
 def generate_meal_plan_shopping_list(recipes_data: list) -> dict:
-    """Generate merged shopping list for multiple recipes."""
+    """Generate merged shopping list for multiple recipes (MOCK)."""
     try:
-        all_ingredients = []
-        for recipe in recipes_data:
-            ingredients = recipe.get("ingredients", [])
-            if isinstance(ingredients, list):
-                all_ingredients.extend(ingredients)
-        
-        ingredients_text = str(all_ingredients)
-        prompt_text = prompts.meal_plan_shopping_prompt.format(ingredients=ingredients_text)
-        result = llm_extraction.invoke(prompt_text)
-        
-        result = result.strip()
-        if result.startswith("```"):
-            result = result.split("```")[1]
-            if result.startswith("json"):
-                result = result[4:]
-        result = result.strip()
-        
-        shopping_list = json.loads(result)
-        return shopping_list if isinstance(shopping_list, dict) else {}
+        # Return mock merged shopping list
+        shopping_list = {
+            "dairy": ["2 cups butter", "4 eggs"],
+            "produce": ["2 onions", "3 cloves garlic"],
+            "pantry": ["4 cups flour", "2 cups sugar", "3 tsp baking powder", "0.5 tsp salt"],
+            "spices": ["2 tsp vanilla extract", "1 tsp cinnamon"],
+            "bakery": [],
+            "frozen": [],
+            "meat": [],
+            "other": []
+        }
+        logger.info(f"Mock meal plan shopping list generated for {len(recipes_data)} recipes")
+        return shopping_list
     except Exception as e:
         logger.error(f"Meal plan shopping list error: {str(e)}")
         return {}
